@@ -1,13 +1,17 @@
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
+const mongoose = require('mongoose');
 
 require('dotenv/config');
 
 const api = process.env.API_URL;
+const PORT = process.env.PORT || 3000;
+const MongoDb = process.env.MongoDb;
 
-app.get('/', (req, res) => {
-  res.send('API');
-});
+// middlewares
+app.use(express.json());
+app.use(morgan('tiny'));
 
 // call http://localhost:3000/api/v1/products
 app.get(`${api}products`, (req, res) => {
@@ -19,6 +23,24 @@ app.get(`${api}products`, (req, res) => {
   res.send(product);
 });
 
-app.listen(3000, () => {
-  console.log('server is working!');
+app.post(`${api}products`, (req, res) => {
+  const product = req.body;
+  res.send(product);
 });
+
+app.get('/', (req, res) => {
+  res.send('API');
+});
+
+async function start() {
+  try {
+    await mongoose.connect(MongoDb);
+    app.listen(PORT, () => {
+      console.log('Server has been started...');
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+start();
